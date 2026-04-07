@@ -15,7 +15,7 @@ Submission dates:
   [Test-Cases-Submission.xlsx](./Test-Cases-Submission.xlsx) while following
   the requirements in [Test Plan Assignment.docx](./Test%20Plan%20Assignment.docx)
 
-- Assignment 1: Tuesday, April 14th at 11:59 PM
+- Assignment 1: Tuesday, April 15th at 11:59 PM
 
 - Assignment 2: executing those planned scenarios with Playwright and completing
   the reporting expectations described in
