@@ -1,4 +1,3 @@
-/*
 // @ts-check
 import { test, expect } from "@playwright/test";
 
@@ -271,4 +270,3 @@ test.describe("TC-010, TC-011, TC-012, TC-013, TC-014: User Registration", () =>
     );
   });
 });
-*/

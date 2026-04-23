@@ -34,9 +34,37 @@ async function loginUser(page, email, password) {
 async function loginAdmin(page) {
   await page.goto(`${BASE_URL}/admin/login`);
   await page.fill("#username", "admin");
-  await page.fill("#password", "admin");
+  await page.fill("#password", "admin123");
   await page.click('button[type="submit"]');
   await page.waitForURL(`${BASE_URL}/admin/events`);
+}
+
+async function createAdminEvent(page, title, slots = 20) {
+  await loginAdmin(page);
+  await page.goto(`${BASE_URL}/admin/events/new`);
+  await page.fill("#title", title);
+  await page.fill("#date", "2026-09-15");
+  await page.fill("#location", "Test Venue, Kingston");
+  await page.fill("#category", "Testing");
+  await page.fill(
+    "#image",
+    "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=1200&q=80",
+  );
+  await page.fill(
+    "#description",
+    "A test event created by the Playwright test suite.",
+  );
+  await page.fill("#availableSlots", String(slots));
+  await page.getByRole("button", { name: "Create Event" }).click();
+  await page.waitForURL(/\/admin\/events(\?.*)?$/);
+}
+
+async function setupTestEvent(page, slots = 20) {
+  const eventTitle = `Test Event ${Date.now()}`;
+  await createAdminEvent(page, eventTitle, slots);
+  await page.click('form[action="/admin/logout"] button');
+  await page.waitForURL(`${BASE_URL}/admin/login`);
+  return eventTitle;
 }
 
 // USER LOGIN
@@ -178,13 +206,14 @@ test.describe("TC-020 to TC-021: User Logout", () => {
 // EVENTS DIRECTORY
 test.describe("TC-022 - TC-023: Events Directory", () => {
   // TC-022: All 8 starter events are displayed on /events
-  test("TC-022: Events page displays all 8 starter events as cards with required fields", async ({
+  test("TC-022: Events page displays at least all 8 starter events as cards with required fields", async ({
     page,
   }) => {
     await page.goto(`${BASE_URL}/events`);
 
     const cards = page.locator("article.event-list-item");
-    await expect(cards).toHaveCount(8);
+    const cardCount = await cards.count();
+    expect(cardCount).toBeGreaterThanOrEqual(8);
 
     // Verify the first card has the expected elements
     const first = cards.first();
@@ -261,12 +290,15 @@ test.describe("TC-024 to TC-028: Event Detail Page", () => {
   test("TC-026: Logged-in user with no registration sees Register For This Event button", async ({
     page,
   }) => {
+    const eventTitle = await setupTestEvent(page, 20);
     await registerAndLogin(page);
     await page.goto(`${BASE_URL}/events`);
-    await page
-      .locator("article.event-list-item a.event-card-link")
-      .first()
-      .click();
+    const eventCard = page.locator("article.event-list-item", {
+      hasText: eventTitle,
+    });
+    await expect(eventCard).toBeVisible();
+    await eventCard.locator("a.event-card-link").click();
+    await page.waitForURL(/\/events\/.+/);
 
     await expect(
       page.getByRole("link", { name: "Register For This Event" }),
