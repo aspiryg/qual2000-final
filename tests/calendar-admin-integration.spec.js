@@ -1,5 +1,10 @@
 // @ts-check
 import { test, expect } from "@playwright/test";
+// I used Node's built-in crypto module to generate unique tokens in addition to timestamps.
+// This ensures uniqueness even if tests run very quickly, and avoids any issues with parallel
+// test execution where multiple tests might share the same timestamp.
+// The randomUUID function generates a random UUID string, and I slice it to keep the token
+// shorter while still maintaining uniqueness.
 import { randomUUID } from "crypto";
 
 const BASE_URL = "http://localhost:3000";
